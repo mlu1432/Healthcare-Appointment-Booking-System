@@ -1,0 +1,31 @@
+import { useEffect, useState } from "react";
+import CategorySearch from "../_components/CategorySearch";
+import DoctorList from "../_components/DoctorList";
+import Hero from "../_components/Hero";
+
+export default function Home() {
+  const [doctorsList, setDoctorList] = useState([]);
+
+  useEffect(() => {
+    // Mock data for doctors list
+    const mockDoctors = [
+      { id: 1, name: "Dr. Lerato Ndlovu", specialty: "Cardiologist", location: "Pretora" },
+      { id: 2, name: "Dr. Jane Shakwane", specialty: "Dentist", location: "Johannesburg" },
+      { id: 3, name: "Dr. Pretty Brown", specialty: "Psychologist", location: "Midrand" },
+    ];
+    setDoctorList(mockDoctors);
+  }, []);
+
+  return (
+    <div>
+      {/* Hero Section to introduce the platform */}
+      <Hero />
+
+      {/* Search bar and category section */}
+      <CategorySearch />
+
+      {/* Popular Doctor List Section */}
+      <DoctorList doctorList={doctorsList} />
+    </div>
+  );
+}
