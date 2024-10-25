@@ -5,8 +5,6 @@ import { useEffect, useState } from "react";
 import Hero from "@/app/_components/Hero";
 import CategorySearch from "@/app/_components/CategorySearch";
 import DoctorList from "@/app/_components/DoctorList";
-import Footer from "@/app/_components/Footer";
-import Header from "@/app/_components/Header";
 
 export default function Home() {
   const [doctorsList, setDoctorList] = useState([]);
@@ -23,9 +21,6 @@ export default function Home() {
 
   return (
     <div>
-      {/* Header Section */}
-      <Header />
-
       {/* Hero Section to introduce the platform */}
       <Hero />
 
@@ -34,9 +29,6 @@ export default function Home() {
 
       {/* Popular Doctor List Section */}
       <DoctorList doctorList={doctorsList} />
-
-      {/* Footer Section */}
-      <Footer />
     </div>
   );
 }
