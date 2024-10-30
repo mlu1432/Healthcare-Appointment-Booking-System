@@ -1,18 +1,23 @@
-// SpecialistCard.jsx
+// firstcare-frontend/app/(route)/category/_components/SpecialistCard.jsx
 // Component to display a specialist's brief information as a card.
-// This card includes a profile image, name, title, clinic details, ratings, and availability.
-// It can be used for listing specialists on a category page,
-// and clicking on the card will navigate to the specialist's detailed profile.
+// This card includes a profile image, name, title, clinic details, ratings, availability, and a "Book Now" button.
 
-import React, { useEffect } from 'react';
-import PropTypes from 'prop-types';
+"use client";
+
+import React from 'react';
 import Image from 'next/image';
+import PropTypes from 'prop-types';
 
-export default function SpecialistCard({ profileImage, name, title, clinicName, location, ratings, availability, onClick }) {
-  useEffect(() => {
-    console.log(`SpecialistCard rendered: ${name}`);
-  }, [name]);
-
+export default function SpecialistCard({
+  profileImage = "/default-avatar.jpg",
+  name = "Default Name",
+  title = "Specialist",
+  clinicName = "Default Clinic",
+  location = "Default Location",
+  ratings = 0,
+  availability = "Not Available",
+  onClick = () => {},
+}) {
   return (
     <div 
       className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-all duration-300 ease-in-out"
@@ -23,13 +28,13 @@ export default function SpecialistCard({ profileImage, name, title, clinicName, 
         <Image 
           src={profileImage} 
           alt={`${name} Profile`} 
-          width={100} 
-          height={100} 
+          width={150} 
+          height={150} 
           className="rounded-full"
         />
       </div>
 
-      {/* Specialist Name and Title */}
+      {/* Specialist Info */}
       <h3 className="text-xl font-bold text-[#003E65] text-center">{name}</h3>
       <p className="text-md text-gray-600 text-center">{title}</p>
 
@@ -48,21 +53,27 @@ export default function SpecialistCard({ profileImage, name, title, clinicName, 
       <div className="text-center mt-4">
         <p className="text-green-600 font-bold">{availability}</p>
       </div>
+
+      {/* Book Now Button */}
+      <div className="mt-4 text-center">
+        <button 
+          className="bg-[#F06255] text-white font-bold py-2 px-8 rounded-lg w-full hover:bg-[#e05045] transition duration-200"
+          onClick={onClick}
+        >
+          Book Now
+        </button>
+      </div>
     </div>
   );
 }
 
 SpecialistCard.propTypes = {
-  profileImage: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  title: PropTypes.string.isRequired,
-  clinicName: PropTypes.string.isRequired,
-  location: PropTypes.string.isRequired,
-  ratings: PropTypes.number.isRequired,
-  availability: PropTypes.string.isRequired,
+  profileImage: PropTypes.string,
+  name: PropTypes.string,
+  title: PropTypes.string,
+  clinicName: PropTypes.string,
+  location: PropTypes.string,
+  ratings: PropTypes.number,
+  availability: PropTypes.string,
   onClick: PropTypes.func,
-};
-
-SpecialistCard.defaultProps = {
-  onClick: () => {},
 };

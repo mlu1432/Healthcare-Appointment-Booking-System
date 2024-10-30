@@ -1,11 +1,8 @@
-// CategorySearch.jsx is a reusable component that displays a list of category cards for searching healthcare professionals.
-// Handler function for clicking a card, e.g., navigate to a specific page
-
 import React from "react";
 import CategoryCard from "@/app/(route)/search/_components/CategoryCard";
-import { useRouter } from 'next/navigation'; // Import useRouter for navigation
+import { useRouter } from 'next/navigation';
 import GPDoctorIcon from "@/public/gp-doctors.svg";
-import GynaecologistIcon from "@/public/gynecologist.png";
+import GynecologistIcon from "@/public/gynecologist.png";
 import DentistIcon from "@/public/dentist.svg";
 import PsychologistIcon from "@/public/psychologist.png";
 import CardiologistIcon from "@/public/heart.svg";
@@ -35,13 +32,15 @@ export default function CategorySearch() {
         </p>
 
         {/* Search Bar */}
-        <div className="flex justify-center items-center mt-6">
-          <input
-            type="text"
-            placeholder="Search for healthcare professionals..."
-            className="w-1/3 h-14 pl-4 border border-[#012944] rounded-l-full outline-none"
+        <div className="flex justify-center mt-6 mb-10">
+          <input 
+            type="text" 
+            placeholder="Search for a specialist..." 
+            className="w-1/2 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#F06255]"
           />
-          <button className="bg-[#F06255] text-white px-6 h-14 rounded-r-full">
+          <button 
+            className="ml-3 px-6 py-2 bg-[#F06255] text-white rounded-lg hover:bg-[#e05045] transition"
+          >
             Search
           </button>
         </div>
@@ -55,8 +54,8 @@ export default function CategorySearch() {
             onClick={() => handleCardClick('GP Doctors')}
           />
           <CategoryCard 
-            icon={GynaecologistIcon} 
-            title="Gynaecologist" 
+            icon={GynecologistIcon} 
+            title="Gynecologist" 
             onClick={() => handleCardClick('Gynaecologist')}
           />
           <CategoryCard 

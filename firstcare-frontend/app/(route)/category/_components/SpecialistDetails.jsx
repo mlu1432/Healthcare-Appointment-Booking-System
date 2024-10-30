@@ -1,68 +1,64 @@
-// SpecialistDetails.jsx
-// Component to display the detailed information of a specialist.
-// This component includes a profile image, name, title, clinic details, ratings,
-// availability, qualifications, and other relevant details.
+// firstcare-frontend/app/(route)/category/_components/SpecialistDetails.jsx
+// Component to display detailed information of a selected specialist.
+
 import React from 'react';
-import { useRouter } from 'next/router';
-import PropTypes from 'prop-types';
 import Image from 'next/image';
 
-export default function SpecialistDetails({ specialistData }) {
-  const router = useRouter();
-  const { id } = router.query;
+// SpecialistDetails Component
+export default function SpecialistDetails({ specialist }) {
+  // If the specialist is not available, return nothing
+  if (!specialist) return null;
 
-  if (!specialistData) {
-    return <p>Loading specialist details...</p>;
-  }
+  // Destructuring the properties of specialist for easier access
+  const { 
+    profileImage = "/images/default-profile.png", // Fallback image
+    name = "Default Specialist",
+    title = "General Practitioner",
+    clinicName = "Unknown Clinic",
+    location = "Unknown Location",
+    ratings = 0,
+    availability = "Unavailable",
+    description = "No further details provided for this specialist.",
+  } = specialist;
 
   return (
-    <section className="p-10 bg-white text-center">
-      {/* Specialist Profile Image */}
+    <div className="p-6 border border-gray-200 rounded-lg bg-white shadow-md">
+      {/* Profile Image */}
       <div className="flex justify-center mb-6">
         <Image 
-          src={specialistData.profileImage} 
-          alt={`${specialistData.name} Profile`} 
-          width={200} 
-          height={200} 
-          className="rounded-full"
+          src={profileImage} 
+          alt={`${name} Profile`} 
+          width={150} 
+          height={150} 
+          className="rounded-full shadow-md"
+          priority
         />
       </div>
 
       {/* Specialist Name and Title */}
-      <h2 className="text-4xl font-bold text-[#003E65]">{specialistData.name}</h2>
-      <p className="text-md text-gray-600 mt-2">{specialistData.title}</p>
+      <h1 className="text-2xl font-bold text-[#003E65] text-center">{name}</h1>
+      <p className="text-md text-gray-600 text-center">{title}</p>
 
-      {/* Clinic, Location, and Availability */}
-      <div className="mt-4">
-        <p className="text-lg text-gray-500">{specialistData.clinicName}</p>
-        <p className="text-lg text-gray-500">{specialistData.location}</p>
-        <p className="text-green-600 font-bold mt-4">{specialistData.availability}</p>
+      {/* Clinic and Location */}
+      <div className="text-center mt-4">
+        <p className="text-lg text-gray-500 font-semibold">{clinicName}</p>
+        <p className="text-md text-gray-500">{location}</p>
       </div>
 
       {/* Ratings */}
-      <div className="mt-4">
-        <span className="text-yellow-500 text-xl">{specialistData.ratings} ⭐</span>
-        <p className="text-sm text-gray-400">({specialistData.ratings} Ratings)</p>
+      <div className="text-center mt-4">
+        <span className="text-yellow-500 text-xl">{ratings} ⭐</span>
       </div>
 
-      {/* About Section (optional details) */}
-      <div className="mt-8">
-        <h3 className="text-2xl font-bold text-[#003E65] mb-4">About the Specialist</h3>
-        <p className="text-gray-600">{specialistData.about}</p>
+      {/* Availability */}
+      <div className="text-center mt-4">
+        <p className={`font-bold ${availability === "Available" ? "text-green-600" : "text-red-600"}`}>{availability}</p>
       </div>
-    </section>
+
+      {/* Description */}
+      <div className="mt-6 text-gray-700 text-justify">
+        <p>{description}</p>
+      </div>
+    </div>
   );
 }
-
-SpecialistDetails.propTypes = {
-  specialistData: PropTypes.shape({
-    profileImage: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    clinicName: PropTypes.string.isRequired,
-    location: PropTypes.string.isRequired,
-    ratings: PropTypes.number.isRequired,
-    availability: PropTypes.string.isRequired,
-    about: PropTypes.string,
-  }),
-};

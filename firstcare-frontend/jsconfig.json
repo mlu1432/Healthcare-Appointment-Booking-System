@@ -2,9 +2,20 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@/firebase/*": ["firebase/*"],
+      "@/components/*": ["components/*"],
+      "@/utils/*": ["app/_utils/*"],
+      "@/route/*": ["app/(route)/*"],
+      "@/app/*": ["app/*"],
+      "@/fonts/*": ["app/fonts/*"],
+      "@/sidebar/*": ["app/_components/*"],
+      "@/category/*": ["app/(route)/category/*"],
+      "@/categoryComponents/*": ["app/(route)/category/_components/*"],
+      "@/searchComponents/*": ["app/(route)/search/_components/*"],
+      "@/ui/*": ["components/ui/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.js", "**/*.jsx"],
+  "include": ["next-env.d.ts", "**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]
 }

@@ -1,6 +1,9 @@
-// index.jsx for GP Doctors category
+// firstcare-frontend/app/(route)/category/gp-doctors/page.jsx 
+// GP Doctors Category Page with Sidebar and displaying all available specialists.
 import React from 'react';
-import SpecialistCard from '../../_components/SpecialistCard';
+import SpecialistCard from '../_components/SpecialistCard';
+import { AppSidebar } from '../../../_components/Sidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
 
 export default function GPDoctors() {
   const gpDoctors = [
@@ -25,15 +28,28 @@ export default function GPDoctors() {
   ];
 
   return (
-    <section className="py-10 bg-[#F5F5F5] text-center">
-      <div className="container mx-auto">
-        <h2 className="text-4xl font-bold text-[#003E65] mb-6">General Practitioners</h2>
-        <div className="flex flex-wrap justify-center gap-8">
-          {gpDoctors.map((specialist, index) => (
-            <SpecialistCard key={index} {...specialist} />
-          ))}
+    <div className="category-layout flex">
+      {/* Sidebar Section */}
+      <div className="w-1/4 h-screen sticky top-0">
+        <SidebarProvider>
+          <AppSidebar />
+        </SidebarProvider>
+      </div>
+
+      {/* Main Content Section */}
+      <div className="w-3/4 py-10 bg-[#F5F5F5] text-center">
+        <div className="container mx-auto max-w-screen-lg px-4">
+          {/* Page Title */}
+          <h2 className="text-4xl font-bold text-[#003E65] mb-6">GP Doctors</h2>
+
+          {/* Specialist Cards Container */}
+          <div className="flex flex-wrap justify-center gap-8">
+            {gpDoctors.map((specialist, index) => (
+              <SpecialistCard key={index} {...specialist} />
+            ))}
+          </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
