@@ -1,11 +1,9 @@
 // firstcare-frontend/app/(route)/category/_components/SpecialistCard.jsx
-// Component to display a specialist's brief information as a card.
-// This card includes a profile image, name, title, clinic details, ratings, availability, and a "Book Now" button.
-
 "use client";
 
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link'; 
 import PropTypes from 'prop-types';
 
 export default function SpecialistCard({
@@ -56,12 +54,11 @@ export default function SpecialistCard({
 
       {/* Book Now Button */}
       <div className="mt-4 text-center">
-        <button 
-          className="bg-[#F06255] text-white font-bold py-2 px-8 rounded-lg w-full hover:bg-[#e05045] transition duration-200"
-          onClick={onClick}
-        >
-          Book Now
-        </button>
+        <Link href="/booking">
+          <button className="bg-[#F06255] text-white font-bold py-2 px-4 rounded hover:bg-[#e05045] transition">
+            Book Now
+          </button>
+        </Link>
       </div>
     </div>
   );
