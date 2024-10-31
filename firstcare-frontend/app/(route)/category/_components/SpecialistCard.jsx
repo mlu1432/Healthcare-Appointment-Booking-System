@@ -1,4 +1,6 @@
 // firstcare-frontend/app/(route)/category/_components/SpecialistCard.jsx
+// Component to display a specialist's brief information as a card.
+// This card includes a profile image, name, title, clinic details, ratings, availability, and a "Book Now" button.
 "use client";
 
 import React from 'react';
