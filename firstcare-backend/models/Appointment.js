@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 
 // Define Appointment schema with fields for date, time, reason, category, and doctor
 const appointmentSchema = new mongoose.Schema({
+  
   date: {
     type: Date,
     required: true,
