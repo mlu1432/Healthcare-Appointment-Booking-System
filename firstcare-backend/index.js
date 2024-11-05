@@ -1,32 +1,25 @@
-// Main entry file for the FirstCare backend server
-// This sets up Express, connects to MongoDB, and defines the main routes for the API.
-
-require('dotenv').config();
+// index.js
 const express = require('express');
 const mongoose = require('mongoose');
+const appointmentRoutes = require('./routes/appointmentRoutes');
+require('dotenv').config();
+
 const app = express();
+const PORT = process.env.PORT || 3001;
 
-// Import routes
-const appointmentRoutes = require('./routes/appointments');
-
-// Middleware to parse JSON requests
+// Middleware to parse JSON data
 app.use(express.json());
 
-// Connect to MongoDB using Mongoose
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.error('Failed to connect to MongoDB:', err.message));
-
-// Use appointment routes for the /api/appointments endpoint
+// Use appointment routes with the base URL `/api/appointments`
 app.use('/api/appointments', appointmentRoutes);
 
-// Basic route to check if the server is running
-app.get('/', (req, res) => {
-  res.send('FirstCare Backend is running');
-});
-
-// Start server and listen on specified port
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+// Connect to MongoDB
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => {
+        app.listen(PORT, () => {
+            console.log(`Server is running on http://localhost:${PORT}`);
+        });
+    })
+    .catch(error => {
+        console.error("Database connection error:", error);
+    });

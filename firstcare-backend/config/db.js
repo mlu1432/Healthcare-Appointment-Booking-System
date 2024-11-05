@@ -1,7 +1,7 @@
-// config/db.js
-// Handles MongoDB connection setup using Mongoose
+// Import Mongoose library for MongoDB connection
 const mongoose = require('mongoose');
 
+// Function to connect to MongoDB using Mongoose
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI, {
@@ -10,9 +10,10 @@ const connectDB = async () => {
     });
     console.log('MongoDB connected successfully');
   } catch (error) {
-    console.error('MongoDB connection failed:', error.message);
-    process.exit(1); // Exit with failure
+    console.error('MongoDB connection error:', error.message);
+    process.exit(1);
   }
 };
 
+// Export the connection function
 module.exports = connectDB;
