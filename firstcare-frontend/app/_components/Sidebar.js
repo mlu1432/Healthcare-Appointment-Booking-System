@@ -1,3 +1,4 @@
+// firstcare-frontend/app/_components/Sidebar.js
 // Define the categories with their respective titles, URLs, and icons
 
 "use client";
@@ -12,7 +13,7 @@ import {
   SidebarMenuButton,
   SidebarProvider
 } from "@/components/ui/sidebar";
-import { Calendar, Heart, User, Home, Eye } from "lucide-react";
+import { Calendar, Heart, User, Home, Eye, ClipboardList } from "lucide-react";
 import Link from 'next/link';
 
 const categories = [
@@ -29,7 +30,6 @@ export function AppSidebar() {
     <SidebarProvider>
       <Sidebar side="left" collapsible="icon">
         <SidebarContent>
-          {/* Navigation Menu for Healthcare Categories */}
           <SidebarGroup>
             <SidebarMenu>
               {categories.map((category) => {
@@ -39,7 +39,6 @@ export function AppSidebar() {
                     <SidebarMenuButton asChild>
                       <Link href={category.url}>
                         <div className="flex items-center cursor-pointer">
-                          {/* Icon and text color changes */}
                           <Icon className="w-5 h-5 text-[#F5A15B]" aria-hidden="true" />
                           <span className="ml-2 text-[#003E65]">{category.title}</span>
                         </div>
@@ -59,6 +58,20 @@ export function AppSidebar() {
                   <div className="flex items-center bg-[#E8DBDB] text-[#F06255] px-4 py-2 rounded-lg hover:bg-[#e05045] transition mt-4 cursor-pointer">
                     <Calendar className="w-5 h-5 text-[#F5A15B]" aria-hidden="true" />
                     <span className="ml-2 text-[#003E65]">Book an Appointment</span>
+                  </div>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarGroup>
+
+          {/* Registration Feature */}
+          <SidebarGroup>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href="/registerform">
+                  <div className="flex items-center bg-[#E8DBDB] text-[#F06255] px-4 py-2 rounded-lg hover:bg-[#e05045] transition mt-4 cursor-pointer">
+                    <ClipboardList className="w-5 h-5 text-[#F5A15B]" aria-hidden="true" />
+                    <span className="ml-2 text-[#003E65]">Patient Register Form</span>
                   </div>
                 </Link>
               </SidebarMenuButton>
