@@ -1,11 +1,11 @@
 // firstcare-frontend/app/(route)/book-appointment/BookAppointmentForm.jsx
 // Book Appointment form component with background image and dynamic doctor selection by category
-
+// BookAppointmentForm Component (BookAppointmentForm.jsx)
+// Book an appointment by selecting doctor category and available doctors
 import React, { useState } from 'react';
 import axios from 'axios';
 
-// Organized doctor data by category
-const doctorOptions = { 
+const doctorOptions = {
   "Cardiologist": [
     { name: "Dr. LB Osrin", title: "Cardiologist", clinicName: "Cardiology Clinic" },
     { name: "Dr. Mpe M.T Administrators", title: "Cardiologist", clinicName: "Mediclinic Heart Hospital" },
@@ -40,10 +40,8 @@ export default function BookAppointmentForm() {
     category: '',
     doctor: '',
   });
-
   const [responseMessage, setResponseMessage] = useState('');
 
-  // Update form data when inputs change
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -52,7 +50,6 @@ export default function BookAppointmentForm() {
     });
   };
 
-  // Submit form data
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -71,7 +68,7 @@ export default function BookAppointmentForm() {
         backgroundImage: `url('/stethoscope.jpg')`,
       }}
     >
-      <div className="absolute inset-0 bg-black opacity-50"></div> {/* Dark overlay for readability */}
+      <div className="absolute inset-0 bg-black opacity-50"></div>
 
       <form 
         onSubmit={handleSubmit} 
@@ -79,10 +76,8 @@ export default function BookAppointmentForm() {
       >
         <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">Book an Appointment</h2>
 
-        {/* Response Message Display */}
         {responseMessage && <p className="text-center mb-4">{responseMessage}</p>}
 
-        {/* Date and Time Fields */}
         <label className="block text-gray-700 font-bold mb-2">
           Date
           <input 
@@ -107,7 +102,6 @@ export default function BookAppointmentForm() {
           />
         </label>
 
-        {/* Reason for Appointment */}
         <label className="block text-gray-700 font-bold mb-2">
           Reason for Appointment
           <textarea 
@@ -120,7 +114,6 @@ export default function BookAppointmentForm() {
           />
         </label>
 
-        {/* Category Selection */}
         <label className="block text-gray-700 font-bold mb-2">
           Category
           <select 
@@ -137,7 +130,6 @@ export default function BookAppointmentForm() {
           </select>
         </label>
 
-        {/* Doctor Selection */}
         <label className="block text-gray-700 font-bold mb-2">
           Doctor
           <select 

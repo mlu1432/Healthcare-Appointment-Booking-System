@@ -1,23 +1,21 @@
 // firstcare-frontend/app/(route)/auth/auth.js
-
 // This file combines the Sign-In, Sign-Up, and Google Authentication processes in a
 // single component for a healthcare appointment booking application.
 // It allows users to create a new account, log in using their existing credentials,
 // or log in with their Google account.
 // Firebase authentication is used to manage user credentials,
 // and the form adapts dynamically for signing in or signing up.
-
 "use client"; // Ensures this component runs on the client side
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation"; // Updated to next/navigation
+import { useRouter } from "next/navigation"; 
 import Image from "next/image";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithPopup,
 } from "firebase/auth";
-import { auth, googleProvider } from "@/firebase/config"; // Ensure the import path points correctly to config.js
+import { auth, googleProvider } from "@/firebase/config"; 
 
 export default function Auth({ initialMode = "signIn" }) {
   const router = useRouter();
@@ -25,31 +23,25 @@ export default function Auth({ initialMode = "signIn" }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // Handle Email Change
-  const handleEmailChange = (e) => {
-    setEmail(e.target.value);
-  };
+  // Email and Password Handlers
+  const handleEmailChange = (e) => setEmail(e.target.value);
+  const handlePasswordChange = (e) => setPassword(e.target.value);
 
-  // Handle Password Change
-  const handlePasswordChange = (e) => {
-    setPassword(e.target.value);
-  };
-
-  // Handle Sign In
+  // Handle Email Sign In
   const handleSignIn = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.push("/"); // Redirect to the Home page (firstcare-frontend/app/page.js) after successful sign-in
+      router.push("/"); // Redirect to the home page after successful sign-in
     } catch (error) {
       console.error("Error signing in:", error);
     }
   };
 
-  // Handle Sign Up
+  // Handle Email Sign Up
   const handleSignUp = async () => {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      router.push("/"); // Redirect to the Home page (firstcare-frontend/app/page.js) after successful sign-up
+      router.push("/"); // Redirect to the home page after successful sign-up
     } catch (error) {
       console.error("Error signing up:", error);
     }
@@ -59,7 +51,7 @@ export default function Auth({ initialMode = "signIn" }) {
   const handleGoogleSignIn = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
-      router.push("/"); // Redirect to the Home page (firstcare-frontend/app/page.js) after successful Google sign-in
+      router.push("/"); // Redirect to the home page after successful Google sign-in
     } catch (error) {
       console.error("Error with Google sign-in:", error);
     }
@@ -68,6 +60,7 @@ export default function Auth({ initialMode = "signIn" }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm relative">
+        {/* Background image */}
         <div className="absolute inset-0 -z-10 overflow-hidden">
           <Image
             src="/stethoscope.jpg"
@@ -81,6 +74,8 @@ export default function Auth({ initialMode = "signIn" }) {
         <h2 className="text-2xl font-semibold text-center mb-4">
           {isSignUp ? "Create an Account" : "Welcome Back"}
         </h2>
+        
+        {/* Form for sign up or sign in */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -110,6 +105,8 @@ export default function Auth({ initialMode = "signIn" }) {
             {isSignUp ? "Sign Up" : "Continue"}
           </button>
         </form>
+
+        {/* Toggle Sign In/Sign Up */}
         <div className="flex items-center justify-between mt-4">
           <span className="text-gray-500">
             {isSignUp ? "Already have an account?" : "Don't have an account?"}
@@ -121,6 +118,8 @@ export default function Auth({ initialMode = "signIn" }) {
             {isSignUp ? "Sign In" : "Sign Up"}
           </button>
         </div>
+
+        {/* Google Sign In */}
         <div className="flex items-center mt-6">
           <div className="flex-grow border-t border-gray-300"></div>
           <span className="mx-2 text-gray-500">OR</span>
