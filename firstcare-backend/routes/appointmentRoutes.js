@@ -1,4 +1,5 @@
 // routes/appointmentRoutes.js
+// Define the routing for appointment-related endpoints.
 const express = require('express');
 const router = express.Router();
 const {
