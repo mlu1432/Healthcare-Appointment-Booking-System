@@ -1,9 +1,9 @@
-// RegisterForm Component
+// RegisterForm
 // This component collects additional registration information after the user signs up or logs in.
 // Users can fill out their full name, phone number, address, medical history, and any allergies they have.
 // The information is then saved to the server, and the user is redirected to the booking page.
 
-"use client"; // This is a client-side component
+"use client";
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -57,24 +57,30 @@ export default function RegisterForm() {
       const token = localStorage.getItem("authToken");
 
       // Save the additional registration data
-      await axios.post("/api/register/details", formData, {
+      await axios.post("http://localhost:3001/api/users/register/details", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      });
+      })
+        .then(() => {
+          // Notify the user of successful registration
+          toast.success("Registration details saved successfully!");
+          setSuccessMessage("Registration details saved successfully!");
 
-      // Notify the user of successful registration
-      toast.success("Registration details saved successfully!");
-      setSuccessMessage("Registration details saved successfully!");
-
-      // Redirect to the book appointment page after success
-      setTimeout(() => {
-        router.push("/auth/bookregister/book");
-      }, 2000);
+          // Redirect to the booking page after success
+          setTimeout(() => {
+            router.push("/booking");
+          }, 2000);
+        })
+        .catch((error) => {
+          // Notify the user of an error during registration
+          toast.error("Failed to save registration details. Please try again.");
+          setError("Failed to save registration details. Please try again.");
+        });
     } catch (error) {
-      // Notify the user of an error during registration
-      toast.error("Failed to save registration details. Please try again.");
-      setError("Failed to save registration details. Please try again.");
+      // Notify the user of a general error during registration
+      toast.error("An unexpected error occurred. Please try again.");
+      setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -153,7 +159,7 @@ export default function RegisterForm() {
           className={`w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition ${loading ? 'cursor-not-allowed' : ''}`}
           disabled={loading}
         >
-          {loading ? 'Saving...' : 'Save & Proceed'}
+          {loading ? 'Saving...' : 'Save & Book'}
         </button>
       </form>
 
