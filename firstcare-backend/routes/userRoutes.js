@@ -1,6 +1,6 @@
 // User Routes (userRoutes.js)
 // Defines the routing for user-related endpoints.
-// Specifically, it handles the `/api/register/details` endpoint, which allows users to submit their registration details.
+// It handles various endpoints including registration, fetching user details, updating, and deleting user information.
 
 const express = require('express');
 const router = express.Router();
