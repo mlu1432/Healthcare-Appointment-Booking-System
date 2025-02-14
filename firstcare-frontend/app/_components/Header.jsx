@@ -2,10 +2,9 @@
 // This Header component provides navigation links and an authentication button for users. 
 // The button dynamically changes from "Sign In" to "Sign Out" based on the user's authentication status.
 // Uses Next.js Image component for logo, Link for navigation, and router for navigation actions.
-// Authentication status is simulated with localStorage and tracked via a `isSignedIn` state, 
-// which would ideally be replaced with actual authentication logic in a real application.
+// Authentication status is simulated with localStorage and tracked via a `isSignedIn` state,
 
-"use client"; // Mark this component as a Client Component
+"use client"; 
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
@@ -16,32 +15,28 @@ function Header() {
   const router = useRouter();
   const [isSignedIn, setIsSignedIn] = useState(false);
 
-  // Simulated check for user authentication status (this would usually come from context or a global state)
   useEffect(() => {
-    // Replace this with real authentication logic
     const userAuthenticated = localStorage.getItem("isSignedIn") === "true";
     setIsSignedIn(userAuthenticated);
   }, []);
 
   const handleAuthAction = () => {
     if (isSignedIn) {
-      // Sign out logic here
       localStorage.setItem("isSignedIn", "false");
       setIsSignedIn(false);
-      // Optionally redirect to home or another page after sign out
       router.push("/");
     } else {
-      // Navigate to Sign In page
       router.push("/auth/signIn");
     }
   };
 
   return (
-    <header className="bg-[#F06255] py-4">
-      <div className="container mx-auto flex justify-between items-center">
+    <header className="bg-[#F06255] py-4 w-full">
+      {/* Full width without container */}
+      <div className="flex justify-between items-center px-8 w-full">
         {/* Logo */}
         <Image src="/logoipsum-298.svg" alt="Logo" width={55} height={55} />
-        
+
         {/* Navigation Links */}
         <nav>
           <ul className="flex gap-6 text-white">

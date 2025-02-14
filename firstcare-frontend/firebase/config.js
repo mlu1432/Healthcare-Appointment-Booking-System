@@ -17,9 +17,6 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// Debugging logs to check if the environment variables are correctly loaded
-console.log("Firebase Config: ", firebaseConfig);
-
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
@@ -29,3 +26,5 @@ export const googleProvider = new GoogleAuthProvider();
 export const firestore = getFirestore(app);
 export const storage = getStorage(app);
 export const analytics = typeof window !== "undefined" ? getAnalytics(app) : null;
+
+export default app;

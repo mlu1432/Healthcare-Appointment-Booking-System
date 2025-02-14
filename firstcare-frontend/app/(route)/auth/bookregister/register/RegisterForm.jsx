@@ -87,10 +87,17 @@ export default function RegisterForm() {
   };
 
   return (
-    <>
+    <div
+      className="relative min-h-screen flex items-center justify-center"
+      style={{
+        backgroundColor: '#F5F5F5',
+      }}
+    >
+      <div className="absolute inset-0 bg-black opacity-50"></div>
+
       <form
         onSubmit={handleSubmit}
-        className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md mt-10"
+        className="relative z-10 max-w-md w-full bg-white p-8 rounded-lg shadow-md mt-10"
       >
         <h2 className="text-2xl font-bold mb-6 text-center">Complete Your Profile</h2>
         {error && <p className="text-red-600 text-center mb-4">{error}</p>}
@@ -165,6 +172,6 @@ export default function RegisterForm() {
 
       {/* Toaster Component for Notifications */}
       <ToastContainer />
-    </>
+    </div>
   );
 }
