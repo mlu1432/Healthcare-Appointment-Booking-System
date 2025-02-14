@@ -37,22 +37,32 @@ jobs:
           node-version: "20"  # Use Node.js version 20
           cache: "npm"  # Cache npm dependencies for faster builds
 
-      # Step 3: Install dependencies inside the frontend folder
-      - name: Install Dependencies
-        working-directory: firstcare-frontend  # Navigate to frontend directory
-        run: npm install  # Install dependencies from package.json
+      # Step 3: Install dependencies inside the backend folder
+      - name: Install Backend Dependencies
+        working-directory: firstcare-backend
+        run: npm ci  # Uses 'ci' for cleaner, more reliable installs
 
-      # Step 4: Build the Next.js app
+      # Step 4: Install dependencies inside the frontend folder
+      - name: Install Frontend Dependencies
+        working-directory: firstcare-frontend
+        run: npm ci
+
+      # Step 5: Start the backend (if needed for frontend build)
+      - name: Start Backend (Optional)
+        working-directory: firstcare-backend
+        run: nohup npm start &  # Runs backend in the background
+
+      # Step 6: Build the Next.js app
       - name: Build Next.js App
         working-directory: firstcare-frontend
         run: npm run build  # Generates the optimized production build
 
-      # Step 5: Export the site as static files for GitHub Pages
+      # Step 7: Export the site as static files for GitHub Pages
       - name: Export Static Files
         working-directory: firstcare-frontend
         run: npm run export  # Converts Next.js pages into static HTML
 
-      # Step 6: Upload the built static files as an artifact for deployment
+      # Step 8: Upload the built static files as an artifact for deployment
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
         with:
