@@ -1,16 +1,11 @@
-// Hero.jsx
-// The Hero component serves as the introductory section of the website, prominently displaying 
-// a welcoming message and a button for exploring healthcare services.
-// The Hero section includes both text and an image content area.
-
 import React from "react";
 import Image from "next/image";
 
 export default function Hero() {
   return (
-    <section className="bg-[#F5F5F5] py-10 text-center relative w-full">
+    <section className="bg-[#F5F5F5] py-10 text-center relative">
       {/* Main Image Background */}
-      <div className="absolute inset-0 -z-10 overflow-hidden w-full">
+      <div className="absolute inset-0 -z-10 overflow-hidden">
         <Image
           src="/DoctorsMain.jpg"
           alt="Doctors ready to assist"
@@ -23,7 +18,7 @@ export default function Hero() {
       </div>
 
       {/* Content Container */}
-      <div className="relative z-10 flex flex-col md:flex-row items-center gap-10 max-w-full px-6 w-full">
+      <div className="container mx-auto relative z-10 flex flex-col md:flex-row items-center gap-10 max-w-6xl px-6">
         {/* Text Content */}
         <div className="text-content max-w-lg text-left">
           <h1 className="text-4xl font-bold text-[#012944] leading-snug">

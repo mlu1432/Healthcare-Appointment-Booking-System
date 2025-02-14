@@ -4,7 +4,7 @@
 // Uses Next.js Image component for logo, Link for navigation, and router for navigation actions.
 // Authentication status is simulated with localStorage and tracked via a `isSignedIn` state,
 
-"use client"; 
+"use client";
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
@@ -63,5 +63,3 @@ function Header() {
     </header>
   );
 }
-
-export default Header;
