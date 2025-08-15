@@ -22,7 +22,7 @@ import User from '../models/userModel.js';
  * 3. Sets HTTP-only session cookie
  */
 export const createSession = async (req, res) => {
-    const token = req.headers.authorization?.split('')[1];
+    const token = req.headers.authorization?.split(' ')[1];
 
     if (!token) {
         return res.status(400).json({
@@ -35,17 +35,17 @@ export const createSession = async (req, res) => {
         // verify the token with firebase
         const decodedToken = await admin.auth().verifyIdToken(token);
         // create or update the user in database
-        const user =awaut User.findOneAndUpdate(
+        const user = await User.findOneAndUpdate(
             { uid: decodedToken.uid },
             {
-                email: decodedToken.eamil,
+                email: decodedToken.email,
                 name: decodedToken.name || "",
                 profilePicture: decodedToken.picture || "",
                 lastLogin: new Date(),
                 $setOnInsert: {
                     // default values for new users
                     roles: ['patient'],
-                    craetedAt: new Date()
+                    createdAt: new Date()
                 }
             },
             { upsert: true, new: true, runValidators: true }
@@ -53,8 +53,8 @@ export const createSession = async (req, res) => {
         //set saecure the HTTP-only cookie
         res.cookie('session', token, {
             httpOnly: true,
-            secure: proccess.env.NODE_ENV === 'production',
-            ssameSite: 'strict',
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
             maxAge: 60 * 60 * 1000, // 1hr (60mins)
             path: '/'
         });
@@ -85,7 +85,7 @@ export const terminateSession = (req, res) => {
     res.clearCookie('session', {
         httpOnly: true,
         secure: proccess.env.NODE_ENV === 'production',
-        SameSite: 'strict',
+        sameSite: 'strict',
         path: '/',
 });
 
@@ -109,14 +109,14 @@ export const getCurrentUser = async (req, res) => {
 
         res.status(200).json({
             uid: user.uid,
-            email: user.emaill,
+            email: user.email,
             name: user.name,
             roles: user.roles,
             profilePicture: user.profilePicture,
             lastLogin: user.lastLogin
         });
     } catch (error) {
-        console.error("Profile retrieval error:" error);
+        console.error("Profile retrieval error:", error);
         res.status(500).json({
             error: "Internal server error",
             code: "SERVER_ERROR"

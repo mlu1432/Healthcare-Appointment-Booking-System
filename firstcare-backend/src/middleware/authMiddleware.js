@@ -12,7 +12,7 @@
  */
 import admin from '../config/firebase.js';
  
-export const verifyToken = async (res, req, next) => {
+export const verifyToken = async (req, res, next) => {
     // extract fron headers or cookies
     const token = req.headers.authorization?.split(' ')[1] || req.cookies.session;
 
@@ -20,7 +20,7 @@ export const verifyToken = async (res, req, next) => {
         return res.status(401).json({
             error: "Authentication required",
             code: "AUTH_REQUIRED",
-            messagea: "No authentication token provided"
+            message: "No authentication token provided"
         });
     }
 
