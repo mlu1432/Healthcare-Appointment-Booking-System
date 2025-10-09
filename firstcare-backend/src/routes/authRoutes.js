@@ -5,21 +5,24 @@
  * - POST /session: Create new session (login)
  * - DELETE /session: Terminate session (logout)
  * - GET /me: Get current user profile
+ * - GET /session/verify: Verify session status (public)
  */
 import express from 'express';
 import {
     createSession,
     terminateSession,
-    getCurrentUser
+    getCurrentUser,
+    verifySession
 } from '../controllers/authControllers.js';
+import { verifyToken } from '../middleware/authMiddleware.js';
 
-// uses tool express (router)
 const router = express.Router();
 
-// public routes
+// Public routes
 router.post('/session', createSession);
+router.get('/session/verify', verifySession);
 
-// protected routes (requires authentication)
+// Protected routes (requires authentication)
 router.delete('/session', verifyToken, terminateSession);
 router.get('/me', verifyToken, getCurrentUser);
 

@@ -5,7 +5,7 @@
       "@/*": ["./*"],
       "@/firebase/*": ["firebase/*"],
       "@/components/*": ["components/*"],
-      "@/utils/*": ["app/_utils/*"],
+      "@/utils/*": ["app/utils/*"],
       "@/route/*": ["app/(route)/*"],
       "@/app/*": ["app/*"],
       "@/fonts/*": ["app/fonts/*"],

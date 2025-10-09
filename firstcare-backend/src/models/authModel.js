@@ -1,5 +1,5 @@
-/**
- * User Model
+/** */
+* User Model
  * 
  * Defines the schema for healthcare system users
  * 
@@ -39,13 +39,16 @@ const userSchema = new mongoose.Schema(
     },
     lastLogin: {
       type: Date
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
     }
   },
   {
-    timestamps: true, // Automatically adds createdAt & updatedAt
+    timestamps: true,
     toJSON: {
       transform: (doc, ret) => {
-        // Remove sensitive/unnecessary fields
         delete ret._id;
         delete ret.__v;
         return ret;
@@ -54,10 +57,9 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Indexes for faster queries
+// indexes
 userSchema.index({ email: 1 });
 userSchema.index({ roles: 1 });
 
 const User = mongoose.model('User', userSchema);
-
 export default User;

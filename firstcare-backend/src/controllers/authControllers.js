@@ -5,6 +5,7 @@
  * - Session creation (login)
  * - Session termination (logout)
  * - User profile retrieval
+ * - Session verification
  * 
  * Security Features:
  * - HTTP-only cookies for session tokens
@@ -22,7 +23,15 @@ import User from '../models/userModel.js';
  * 3. Sets HTTP-only session cookie
  */
 export const createSession = async (req, res) => {
-    const token = req.headers.authorization?.split(' ')[1];
+    let token;
+    
+    // Extract token from Authorization header (could be combined with reCAPTCHA)
+    const authHeader = req.headers.authorization;
+    if (authHeader) {
+        // Handle both formats: "Bearer token" and "Bearer token, ReCAPTCHA recaptchaToken"
+        const parts = authHeader.split(',');
+        token = parts[0].replace('Bearer ', '').trim();
+    }
 
     if (!token) {
         return res.status(400).json({
@@ -32,9 +41,10 @@ export const createSession = async (req, res) => {
     }
 
     try {
-        // verify the token with firebase
+        // Verify the token with Firebase
         const decodedToken = await admin.auth().verifyIdToken(token);
-        // create or update the user in database
+        
+        // Create or update the user in database
         const user = await User.findOneAndUpdate(
             { uid: decodedToken.uid },
             {
@@ -43,19 +53,24 @@ export const createSession = async (req, res) => {
                 profilePicture: decodedToken.picture || "",
                 lastLogin: new Date(),
                 $setOnInsert: {
-                    // default values for new users
                     roles: ['patient'],
                     createdAt: new Date()
                 }
             },
-            { upsert: true, new: true, runValidators: true }
+            { 
+                upsert: true, 
+                new: true, 
+                runValidators: true,
+                setDefaultsOnInsert: true
+            }
         );
-        //set saecure the HTTP-only cookie
+
+        // Set secure HTTP-only cookie
         res.cookie('session', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
-            maxAge: 60 * 60 * 1000, // 1hr (60mins)
+            maxAge: 60 * 60 * 1000, // 1 hour
             path: '/'
         });
 
@@ -70,7 +85,7 @@ export const createSession = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error("Session creattion error:", error);
+        console.error("Session creation error:", error);
         res.status(401).json({
             error: "Invalid authentication token",
             code: "INVALID_TOKEN"
@@ -84,14 +99,13 @@ export const createSession = async (req, res) => {
 export const terminateSession = (req, res) => {
     res.clearCookie('session', {
         httpOnly: true,
-        secure: proccess.env.NODE_ENV === 'production',
+        secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
         path: '/',
-});
+    });
 
-res.status(200).json({ message: "Session terminated" });
+    res.status(200).json({ message: "Session terminated" });
 };
-
 
 /**
  * Get current user profile
@@ -120,6 +134,48 @@ export const getCurrentUser = async (req, res) => {
         res.status(500).json({
             error: "Internal server error",
             code: "SERVER_ERROR"
+        });
+    }
+};
+
+/**
+ * Verify active session
+ * 
+ * @description Checks if a valid session exists without requiring full authentication
+ * 
+ * Flow:
+ * 1. Check for session cookie
+ * 2. Validate token structure (lightweight check)
+ * 3. Return session status
+ * 
+ * Security:
+ * - Does NOT verify token with Firebase (performance optimization)
+ * - Provides basic session existence check
+ */
+export const verifySession = async (req, res) => {
+    const token = req.cookies.session;
+    
+    if (!token) {
+        return res.status(200).json({ 
+            authenticated: false,
+            message: "No session token found"
+        });
+    }
+    
+    try {
+        // Lightweight token format validation (JWT format)
+        const isValidFormat = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/.test(token);
+        
+        res.status(200).json({
+            authenticated: isValidFormat,
+            tokenValid: isValidFormat,
+            message: isValidFormat ? "Valid session" : "Invalid token format"
+        });
+    } catch (error) {
+        console.error("Session verification error:", error);
+        res.status(200).json({ 
+            authenticated: false,
+            message: "Session verification failed"
         });
     }
 };
