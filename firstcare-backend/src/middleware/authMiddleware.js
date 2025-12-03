@@ -1,45 +1,63 @@
 /**
- * Authentication Middleware
+ * JWT Authentication Middleware
  * 
- * Verifies Firebase ID tokens from:
- * - Authorization header (Bearer token)
- * - HTTP-only cookie (session token)
+ * Verifies JWT tokens from:
+ * - HTTP-only cookies (primary)
+ * - Authorization header (fallback)
  * 
  * Security Features:
- * - Token validation with Firebase Admin SDK
- * - Custom error handling for different failure scenarios
- * - User information attachment to request object
+ * - Token validation with JWT
+ * - Rate limiting for authentication attempts (disabled in development)
  * - Role-based access control
- * - Rate limiting for authentication attempts
+ * - Comprehensive error handling
  */
-import admin from '../config/firebase.js';
-import User from '../models/userModel.js';
 
-// Simple in-memory rate limiting (consider Redis for production)
+import { verifyAccessToken } from '../utils/jwtUtils.js';
+import User from '../models/user.js';
+
+// Rate limiting configuration - more permissive in development
 const authAttempts = new Map();
-const MAX_ATTEMPTS = 5;
-const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const MAX_ATTEMPTS = process.env.NODE_ENV === 'development' ? 1000 : 10;
+const WINDOW_MS = process.env.NODE_ENV === 'development' ? 5 * 60 * 1000 : 15 * 60 * 1000; // 5 min in dev, 15 min in prod
 
 const rateLimitAuth = (ip) => {
+  // Disable rate limiting in development for easier testing
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`Development mode: Rate limiting disabled for IP: ${ip}`);
+    return true;
+  }
+
   const now = Date.now();
   const windowStart = now - WINDOW_MS;
-  
+
   // Clean up old attempts
   const attempts = (authAttempts.get(ip) || []).filter(time => time > windowStart);
-  
+
   if (attempts.length >= MAX_ATTEMPTS) {
+    console.log(`Rate limit exceeded for IP: ${ip}, attempts: ${attempts.length}`);
     return false;
   }
-  
+
   attempts.push(now);
   authAttempts.set(ip, attempts);
   return true;
 };
 
+/**
+ * Clear rate limiting for a specific IP (useful for testing)
+ */
+export const clearRateLimit = (ip) => {
+  authAttempts.delete(ip);
+  console.log(`Rate limit cleared for IP: ${ip}`);
+};
+
+/**
+ * Verify JWT Token Middleware
+ */
 export const verifyToken = async (req, res, next) => {
-  const clientIP = req.ip || req.connection.remoteAddress;
-  
-  // Apply rate limiting
+  const clientIP = req.ip || req.connection.remoteAddress || 'unknown';
+
+  // Apply rate limiting (disabled in development)
   if (!rateLimitAuth(clientIP)) {
     return res.status(429).json({
       error: "Too many authentication attempts",
@@ -48,11 +66,14 @@ export const verifyToken = async (req, res, next) => {
     });
   }
 
-  // Extract from headers or cookies
-  let token = req.headers.authorization?.split(' ')[1];
-  
-  if (!token && req.cookies.session) {
-    token = req.cookies.session;
+  // Extract token from cookies (primary) or Authorization header (fallback)
+  let token = req.cookies.accessToken;
+
+  if (!token) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.split(' ')[1];
+    }
   }
 
   if (!token) {
@@ -64,83 +85,58 @@ export const verifyToken = async (req, res, next) => {
   }
 
   try {
-    // Verify the token with Firebase Admin SDK
-    const decodedToken = await admin.auth().verifyIdToken(token);
-    
-    // Check if user is disabled
-    if (decodedToken.disabled) {
-      return res.status(403).json({
-        error: "Account disabled",
-        code: "ACCOUNT_DISABLED",
-        message: "This account has been disabled by an administrator"
-      });
-    }
-    
-    // Check if email is verified (if required for your application)
-    if (!decodedToken.email_verified) {
-      return res.status(403).json({
-        error: "Email not verified",
-        code: "EMAIL_NOT_VERIFIED",
-        message: "Please verify your email address before accessing this resource"
+    // Verify the JWT token
+    const decoded = verifyAccessToken(token);
+
+    // Check if user exists and is active
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+      return res.status(401).json({
+        error: "User not found",
+        code: "USER_NOT_FOUND",
+        message: "User account does not exist"
       });
     }
 
-    // Get user roles from database
-    let userDoc;
-    try {
-      userDoc = await User.findOne({ uid: decodedToken.uid }).select('roles');
-    } catch (dbError) {
-      console.error("Database error fetching user roles:", dbError);
-      // Continue without roles rather than failing authentication
+    if (!user.isActive) {
+      return res.status(403).json({
+        error: "Account deactivated",
+        code: "ACCOUNT_DEACTIVATED",
+        message: "This account has been deactivated"
+      });
     }
 
     // Attach user information to request
     req.user = {
-      uid: decodedToken.uid,
-      email: decodedToken.email,
-      email_verified: decodedToken.email_verified,
-      name: decodedToken.name || "",
-      picture: decodedToken.picture || "",
-      roles: userDoc?.roles || ['user'], // Default to 'user' role if not found
-      auth_time: decodedToken.auth_time,
-      iat: decodedToken.iat,
-      exp: decodedToken.exp
+      userId: decoded.userId,
+      email: decoded.email,
+      roles: decoded.roles
     };
 
     next();
-  } catch(error) {
+  } catch (error) {
     console.error("Token verification error:", error);
 
-    // Handle specific error cases
+    // Handle specific JWT error cases
     const errorMap = {
-      "auth/id-token-expired": {
+      "TokenExpiredError": {
         code: "TOKEN_EXPIRED",
         message: "Session expired. Please reauthenticate.",
         status: 401
       },
-      "auth/argument-error": {
+      "JsonWebTokenError": {
         code: "INVALID_TOKEN",
-        message: "Malformed authentication token",
-        status: 400
+        message: "Invalid authentication token",
+        status: 401
       },
-      "auth/user-disabled": {
-        code: "USER_DISABLED",
-        message: "This account has been disabled",
-        status: 403
-      },
-      "auth/user-not-found": {
-        code: "USER_NOT_FOUND",
-        message: "User account not found",
-        status: 404
-      },
-      "auth/insufficient-permission": {
-        code: "INSUFFICIENT_PERMISSION",
-        message: "Not enough permissions to verify token",
-        status: 500
+      "NotBeforeError": {
+        code: "TOKEN_NOT_ACTIVE",
+        message: "Token not yet active",
+        status: 401
       }
     };
 
-    const errorInfo = errorMap[error.code] || {
+    const errorInfo = errorMap[error.name] || {
       code: "AUTH_ERROR",
       message: "Authentication failed",
       status: 401
@@ -148,14 +144,14 @@ export const verifyToken = async (req, res, next) => {
 
     res.status(errorInfo.status).json({
       error: errorInfo.message,
-      code: errorInfo.code,
-      // Include reauthentication URL for expired tokens
-      ...(errorInfo.code === "TOKEN_EXPIRED" && { reauth_url: "/api/auth/refresh" })
+      code: errorInfo.code
     });
   }
 };
 
-// Middleware to require authentication for specific roles
+/**
+ * Require specific roles middleware
+ */
 export const requireRole = (roles) => {
   return (req, res, next) => {
     if (!req.user) {
@@ -164,30 +160,28 @@ export const requireRole = (roles) => {
         code: "AUTH_REQUIRED"
       });
     }
-    
-    // Allow if user has any of the required roles
-    const hasRole = Array.isArray(roles) 
-      ? roles.some(role => req.user.roles.includes(role))
-      : req.user.roles.includes(roles);
-    
+
+    // Convert single role to array
+    const requiredRoles = Array.isArray(roles) ? roles : [roles];
+
+    // Check if user has any of the required roles
+    const hasRole = requiredRoles.some(role => req.user.roles.includes(role));
+
     if (!hasRole) {
       return res.status(403).json({
         error: "Insufficient permissions",
         code: "FORBIDDEN",
-        message: `You don't have permission to access this resource. Required roles: ${Array.isArray(roles) ? roles.join(', ') : roles}`
+        message: `Required roles: ${requiredRoles.join(', ')}`
       });
     }
-    
+
     next();
   };
 };
 
-// Middleware to require at least one of multiple roles
-export const requireAnyRole = (roles) => {
-  return requireRole(roles);
-};
-
-// Middleware to require all specified roles
+/**
+ * Require all specified roles middleware
+ */
 export const requireAllRoles = (roles) => {
   return (req, res, next) => {
     if (!req.user) {
@@ -196,17 +190,58 @@ export const requireAllRoles = (roles) => {
         code: "AUTH_REQUIRED"
       });
     }
-    
-    const hasAllRoles = roles.every(role => req.user.roles.includes(role));
-    
+
+    const requiredRoles = Array.isArray(roles) ? roles : [roles];
+    const hasAllRoles = requiredRoles.every(role => req.user.roles.includes(role));
+
     if (!hasAllRoles) {
       return res.status(403).json({
         error: "Insufficient permissions",
         code: "FORBIDDEN",
-        message: `You don't have all required permissions. Required roles: ${roles.join(', ')}`
+        message: `Required all roles: ${requiredRoles.join(', ')}`
       });
     }
-    
+
     next();
   };
+};
+
+/**
+ * Optional authentication middleware
+ * (Attaches user if available, but doesn't require auth)
+ */
+export const optionalAuth = async (req, res, next) => {
+  let token = req.cookies.accessToken;
+
+  if (!token) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.split(' ')[1];
+    }
+  }
+
+  if (token) {
+    try {
+      const decoded = verifyAccessToken(token);
+      const user = await User.findById(decoded.userId);
+
+      if (user && user.isActive) {
+        req.user = {
+          userId: decoded.userId,
+          email: decoded.email,
+          roles: decoded.roles
+        };
+        console.log('Optional auth: User attached to request:', user.email);
+      } else {
+        console.log('Optional auth: User not found or inactive');
+      }
+    } catch (error) {
+      // Silently fail for optional auth
+      console.log("Optional auth token verification failed:", error.message);
+    }
+  } else {
+    console.log('Optional auth: No token provided');
+  }
+
+  next();
 };

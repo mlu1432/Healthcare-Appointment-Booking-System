@@ -7,9 +7,9 @@ import Image from "next/image";
 import PropTypes from "prop-types";
 
 export default function CategoryCard({
-  icon = "", 
-  title = "Category", 
-  onClick = () => {},
+  icon = "",
+  title = "Category",
+  onClick = () => { },
 }) {
   return (
     <div

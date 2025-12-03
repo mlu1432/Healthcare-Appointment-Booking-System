@@ -2,4 +2,4 @@
 node_modules
 .DS_Store
 *.log
-config/firebase-service-account.json
+firstcare-backend/src/config/firebase-service-account.json

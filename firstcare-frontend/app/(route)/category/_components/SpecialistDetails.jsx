@@ -10,7 +10,7 @@ export default function SpecialistDetails({ specialist }) {
   if (!specialist) return null;
 
   // Destructuring the properties of specialist for easier access
-  const { 
+  const {
     profileImage = "/images/default-profile.png", // Fallback image
     name = "Default Specialist",
     title = "General Practitioner",
@@ -25,11 +25,11 @@ export default function SpecialistDetails({ specialist }) {
     <div className="p-6 border border-gray-200 rounded-lg bg-white shadow-md">
       {/* Profile Image */}
       <div className="flex justify-center mb-6">
-        <Image 
-          src={profileImage} 
-          alt={`${name} Profile`} 
-          width={150} 
-          height={150} 
+        <Image
+          src={profileImage}
+          alt={`${name} Profile`}
+          width={150}
+          height={150}
           className="rounded-full shadow-md"
           priority
         />

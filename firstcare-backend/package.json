@@ -13,18 +13,28 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@googlemaps/google-maps-services-js": "^3.4.2",
+    "axios": "^1.13.2",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "date-fns": "^2.30.0",
     "dotenv": "^16.6.1",
     "express": "^4.21.1",
     "express-rate-limit": "^8.0.1",
+    "express-validator": "^7.0.1",
     "firebase-admin": "^13.4.0",
+    "google-auth-library": "^10.4.0",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongodb": "^6.10.0",
+    "mongodb": "^6.20.0",
     "mongoose": "^8.7.3",
-    "nodemailer": "^6.9.16"
+    "nodemailer": "^6.9.16",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.7"
