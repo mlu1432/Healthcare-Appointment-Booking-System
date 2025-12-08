@@ -1,6 +1,7 @@
 [build]
   command = "npm run build"
-  publish = ".next/standalone/.next"  # Correct for standalone output
+  publish = ".next"
+  functions = ".netlify/functions"
 
 [build.environment]
   NODE_VERSION = "18"
