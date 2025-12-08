@@ -27,7 +27,6 @@
  */
 
 // STEP 1: Import all tools and libraries
-
 import express from 'express';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
@@ -51,7 +50,9 @@ import locationRoutes from './routes/locationRoutes.js';
 import placesRoutes from './routes/placesRoutes.js';
 
 // STEP 2: Load environment variables
-dotenv.config();
+dotenv.config({
+  path: process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development'
+});
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -144,6 +145,7 @@ const createRateLimiter = (windowMs, max, scope = 'general') => {
     next();
   };
 };
+
 /**
  * Request Logging Middleware
  * Logs incoming requests for debugging and monitoring
@@ -163,7 +165,7 @@ const requestLogger = (req, res, next) => {
 
   next();
 };
-//STEP 7: Database Health Check Middleware
+
 /**
  * Database Connection Health Check Middleware
  * Checks database connectivity for critical routes
@@ -179,6 +181,7 @@ const dbHealthCheck = (req, res, next) => {
   }
   next();
 };
+
 // ==================== MIDDLEWARE CONFIGURATION ====================
 
 // Apply security headers middleware
@@ -219,10 +222,7 @@ app.use('/api/healthcare/location', createRateLimiter(
   30, // 30 requests per minute (more expensive Google API calls)
   'location_services'
 ));
-//  STEP 8: Core Middleware Configuration
-/**
- * Core Middleware Configuration
- */
+
 // JSON body parsing with size limit
 app.use(express.json({
   limit: '10mb',
@@ -247,7 +247,6 @@ app.use(corsMiddleware);
 app.use('/api/healthcare', dbHealthCheck);
 app.use('/api/appointments', dbHealthCheck);
 
-// STEP 9: Connect to MongoDB
 // ==================== DATABASE CONFIGURATION ====================
 
 // Initialize database connection
@@ -270,7 +269,6 @@ mongoose.connection.on('reconnected', () => {
   console.log('MongoDB reconnected successfully');
 });
 
-// STEP 10: Validate Google Maps API Configuration
 // ==================== SERVICE CONFIGURATION ====================
 
 /**
@@ -284,10 +282,8 @@ try {
   console.log('Location-based features will be limited without proper Google Maps API configuration');
 }
 
-// STEP 11: Swagger API Documentation Setup
-/**
- * Swagger API Documentation Setup
- */
+// ==================== SWAGGER API DOCUMENTATION ====================
+
 console.log('Initializing Swagger API documentation...');
 
 if (typeof swaggerSpec === 'object' && swaggerSpec.openapi) {
@@ -333,7 +329,6 @@ if (typeof swaggerSpec === 'object' && swaggerSpec.openapi) {
   });
 }
 
-// STEP 12: Register All API Routes
 // ==================== API ROUTE REGISTRATION ====================
 
 /**
@@ -366,12 +361,12 @@ app.use('/api/appointments', appointmentRoutes);
  */
 app.use('/api/users', userRoutes);
 
-/** * Places Routes
+/**
+ * Places Routes
  * Google Places API integration for healthcare facility search
  */
 app.use('/api/places', placesRoutes);
 
-// STEP 13: Health Check Endpoint
 // ==================== HEALTH AND STATUS ENDPOINTS ====================
 
 /**
@@ -447,7 +442,6 @@ app.get('/api/health', async (req, res) => {
   res.status(200).json(healthCheck);
 });
 
-// STEP 14: System Info Endpoint
 /**
  * System Information Endpoint
  * Provides detailed system information and configuration
@@ -509,7 +503,6 @@ app.get('/api/system/info', (req, res) => {
   res.status(200).json(systemInfo);
 });
 
-// STEP 15: Root Endpoint (/)
 /**
  * Root Endpoint
  * Provides basic API information and navigation
@@ -592,7 +585,6 @@ app.use('*', (req, res) => {
   });
 });
 
-// STEP 16: Error Handling
 /**
  * Global Error Handler Middleware
  * Centralized error handling for all routes and middleware
@@ -710,7 +702,6 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json(errorResponse);
 });
 
-// STEP 17: SERVER STARTUP
 // ==================== SERVER INITIALIZATION ====================
 
 /**
@@ -796,7 +787,6 @@ const gracefulShutdown = (signal) => {
       });
     });
 
-    // STEP 18: Graceful Shutdown
     // Force shutdown after 10 seconds if graceful shutdown takes too long
     setTimeout(() => {
       console.error('Graceful shutdown timeout - forcing exit');
@@ -820,5 +810,5 @@ process.on('unhandledRejection', (reason, promise) => {
   process.exit(1);
 });
 
-// Export the app for testing purposes
+
 export default app;
