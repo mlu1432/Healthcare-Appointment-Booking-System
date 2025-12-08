@@ -26,6 +26,9 @@ import Header from "./_components/Header";
 import Footer from "./_components/Footer";
 import { Toaster } from "sonner";
 import { UserProvider } from "@/contexts/UserContext";
+import { checkEnvironment } from '@/lib/env-check';
+
+checkEnvironment();
 
 const outfit = Outfit({ subsets: ["latin"] });
 
