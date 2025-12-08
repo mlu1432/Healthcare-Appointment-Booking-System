@@ -1,6 +1,6 @@
 [build]
   command = "npm run build"
-  publish = ".next/standalone/.next"  # Correct for standalone output
+  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "18"

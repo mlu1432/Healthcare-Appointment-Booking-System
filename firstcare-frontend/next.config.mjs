@@ -14,7 +14,7 @@ const nextConfig = {
         // domains: ['fonts.googleapis.com', 'fonts.gstatic.com'],
     },
     staticPageGenerationTimeout: 120,
-    output: 'standalone',
+    
 
     async redirects() {
         return [
