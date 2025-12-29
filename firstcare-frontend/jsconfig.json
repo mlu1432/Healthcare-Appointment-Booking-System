@@ -1,0 +1,58 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./*"
+      ],
+      "@/firebase/*": [
+        "firebase/*"
+      ],
+      "@/components/*": [
+        "components/*"
+      ],
+      "@/utils/*": [
+        "app/utils/*"
+      ],
+      "@/route/*": [
+        "app/(route)/*"
+      ],
+      "@/app/*": [
+        "app/*"
+      ],
+      "@/fonts/*": [
+        "app/fonts/*"
+      ],
+      "@/sidebar/*": [
+        "app/_components/*"
+      ],
+      "@/category/*": [
+        "app/(route)/category/*"
+      ],
+      "@/categoryComponents/*": [
+        "app/(route)/category/_components/*"
+      ],
+      "@/searchComponents/*": [
+        "app/(route)/search/_components/*"
+      ],
+      "@/ui/*": [
+        "components/ui/*"
+      ],
+      "@/register/*": [
+        "app/(route)/auth/bookregister/register/*"
+      ]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.js",
+    "**/*.jsx",
+    "**/*.ts",
+    "**/*.tsx",
+    "../tailwind.config.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "app/(route)/registerform"
+  ]
+}

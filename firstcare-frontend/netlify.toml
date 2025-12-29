@@ -1,0 +1,19 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+  functions = ".netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "18"
+  NEXT_PUBLIC_API_BASE_URL = "https://healthcare-appointment-booking-system-ay9o.onrender.com"
+  NEXT_PUBLIC_DEV_MODE = "false"
+  # Add this line to ignore Google Client ID in secret scanning
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_GOOGLE_CLIENT_ID"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

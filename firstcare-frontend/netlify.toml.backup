@@ -1,0 +1,16 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+  functions = ".netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "18"
+  NEXT_PUBLIC_BASE_URL = "https://healthcarekzn.netlify.app"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

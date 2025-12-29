@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://healthcarekzn.netlify.app/sitemap.xml
