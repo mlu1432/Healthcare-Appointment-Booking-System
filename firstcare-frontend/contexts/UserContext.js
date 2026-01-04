@@ -112,7 +112,7 @@ export function UserProvider({ children }) {
    */
   const refreshToken = useCallback(async () => {
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
       const response = await fetch(`${API_BASE}/api/auth/refresh`, {
         method: 'POST',

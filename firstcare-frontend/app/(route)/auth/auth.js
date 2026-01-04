@@ -123,7 +123,7 @@ export default function Auth({ initialMode = "signIn" }) {
     setError("");
 
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
       const endpoint = isSignUp ? '/api/auth/signup' : '/api/auth/signin';
 
       const payload = {
@@ -190,7 +190,7 @@ export default function Auth({ initialMode = "signIn" }) {
     setError("");
 
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
       const googleAuthUrl = `${API_BASE}/api/auth/google`;
 
       console.log('Redirecting to Google OAuth:', googleAuthUrl);

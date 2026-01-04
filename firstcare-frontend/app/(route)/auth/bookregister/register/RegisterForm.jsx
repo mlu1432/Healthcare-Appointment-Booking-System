@@ -260,7 +260,7 @@ export default function RegisterForm() {
 
       console.log("Submitting KZN profile data:", submitData);
 
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
       const response = await fetch(`${API_BASE}/api/auth/profile`, {
         method: 'PUT',
         headers: {

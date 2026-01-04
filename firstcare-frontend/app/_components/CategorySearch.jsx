@@ -273,7 +273,7 @@ export default function CategorySearch() {
 
     try {
       const token = await getAccessToken();
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
       // Build search query parameters with district filtering
       const searchParams = new URLSearchParams({

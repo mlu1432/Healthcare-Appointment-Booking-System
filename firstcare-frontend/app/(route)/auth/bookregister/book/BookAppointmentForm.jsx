@@ -115,7 +115,7 @@ export default function BookAppointmentForm() {
         const token = await getAccessToken();
         if (!token) return;
 
-        const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
         // Fetch available dates from backend
         const availabilityResponse = await fetch(`${API_BASE}/api/appointments/availability`, {
@@ -746,8 +746,8 @@ export default function BookAppointmentForm() {
               type="submit"
               disabled={loading}
               className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${loading
-                  ? "bg-gray-400 text-gray-200 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700 text-white"
+                ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700 text-white"
                 }`}
             >
               {loading ? (
