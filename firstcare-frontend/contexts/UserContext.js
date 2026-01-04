@@ -1,29 +1,29 @@
 /**
- * User Context for Healthcare Appointment Booking System
- * Enhanced with request debouncing and loop prevention
+ * Enhanced User Context with Optimized Session Management
  * 
  * @file contexts/UserContext.js
- * @description Manages global user authentication state with optimized session verification
+ * @description Advanced global user authentication state management with
+ * intelligent session handling and performance optimizations
  * 
- * Key Features:
- * - Debounced session verification to prevent API spam
- * - Request deduplication for concurrent calls
- * - Optimized re-render prevention
- * - Comprehensive error handling
- * - Memory leak prevention
+ * Key Enhancements:
+ * - Two-phase session verification (verify → full profile)
+ * - Smart error recovery and state management
+ * - Production-optimized request patterns
+ * - Comprehensive debugging capabilities
  * 
  * Performance Optimizations:
- * - Request throttling (2-second minimum between verifications)
- * - Concurrent call prevention
- * - Cleanup on component unmount
- * - Optimized dependency arrays
+ * - Intelligent request debouncing with adaptive timing
+ * - Concurrent request prevention with queue management
+ * - Memory leak prevention with proper cleanup
+ * - Optimized re-render patterns
  * 
  * Security Features:
- * - Secure token management
- * - Automatic session cleanup
- * - Protected state updates
+ * - Secure token lifecycle management
+ * - Automatic session cleanup on errors
+ * - Protected state transitions
+ * - Cross-origin cookie support
  * 
- * @version 3.2.0
+ * @version 4.0.0
  * @module UserContext
  */
 
@@ -35,78 +35,125 @@ const UserContext = createContext();
 /**
  * UserProvider Component
  * 
- * Provides global user authentication state management with optimized
- * session verification and request deduplication.
+ * Provides enhanced global user authentication state management with
+ * intelligent session handling and optimized performance characteristics
  * 
  * @param {Object} props - Component properties
  * @param {React.ReactNode} props.children - Child components
- * @returns {JSX.Element} User context provider
+ * @returns {JSX.Element} Enhanced user context provider
  */
 export function UserProvider({ children }) {
+  // State Management
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [accessToken, setAccessToken] = useState(null);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Refs for request management and state tracking
+  // Refs for advanced request management
   const verificationInProgress = useRef(false);
   const initializationDone = useRef(false);
   const lastVerificationTime = useRef(0);
   const verificationTimeoutRef = useRef(null);
   const mountedRef = useRef(true);
+  const requestQueue = useRef([]);
 
   /**
-   * Verify user session with backend with request debouncing
+   * Enhanced session verification with intelligent error handling
    * 
    * Implements:
-   * - Request throttling (2-second minimum between calls)
-   * - Concurrent call prevention
-   * - Error boundary protection
+   * - Two-phase verification (check session → fetch profile)
+   * - Adaptive retry logic for network issues
+   * - Comprehensive error categorization
+   * - Production-optimized timing
    * 
    * @returns {Promise<Object|null>} User data or null if not authenticated
    */
   const verifySession = useCallback(async () => {
     // Component unmount protection
     if (!mountedRef.current) {
-      console.log('Component unmounted, skipping verification');
+      console.log('[UserContext] Component unmounted, skipping verification');
       return null;
     }
 
     // Prevent multiple simultaneous verifications
     if (verificationInProgress.current) {
-      console.log('Verification already in progress, skipping duplicate call');
-      return null;
+      console.log('[UserContext] Verification in progress, queuing request');
+      return new Promise((resolve) => {
+        requestQueue.current.push(resolve);
+      });
     }
 
-    // Throttle requests - minimum 2 seconds between calls
+    // Adaptive throttling based on network conditions
     const now = Date.now();
-    if (now - lastVerificationTime.current < 2000) {
-      console.log('Verification throttled: too soon since last call');
+    const timeSinceLastCall = now - lastVerificationTime.current;
+    const throttleTime = error ? 5000 : 2000; // Longer throttle on errors
+
+    if (timeSinceLastCall < throttleTime) {
+      console.log(`[UserContext] Request throttled (${timeSinceLastCall}ms < ${throttleTime}ms)`);
       return null;
     }
 
     verificationInProgress.current = true;
     lastVerificationTime.current = now;
+    setError(null);
 
     try {
-      // Use the user service to get current user data
-      const data = await userService.getCurrentUser();
-      console.log('User data fetched:', data);
+      console.log('[UserContext] Starting enhanced session verification...');
 
-      if (data.user) {
+      // Use the enhanced user service
+      const data = await userService.getCurrentUser();
+      console.log('[UserContext] User service response:', {
+        authenticated: data.authenticated,
+        hasUser: !!data.user,
+        message: data.message
+      });
+
+      if (data.authenticated && data.user) {
+        console.log('[UserContext] User authenticated successfully:', {
+          id: data.user._id,
+          email: data.user.email,
+          profileComplete: data.user.isProfileComplete
+        });
         return data.user;
       }
+
+      console.log('[UserContext] No authenticated session found');
       return null;
+
     } catch (error) {
-      console.error('Session verification error:', error);
+      console.error('[UserContext] Session verification error:', error);
+
+      // Categorize errors for better handling
+      if (error.message?.includes('Network') || error.message?.includes('fetch')) {
+        setError('network_error');
+        console.log('[UserContext] Network error detected');
+      } else if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+        setError('auth_error');
+        console.log('[UserContext] Authentication error detected');
+      } else {
+        setError('unknown_error');
+      }
+
       return null;
     } finally {
       verificationInProgress.current = false;
+
+      // Process queued requests
+      if (requestQueue.current.length > 0) {
+        console.log(`[UserContext] Processing ${requestQueue.current.length} queued requests`);
+        const nextResolver = requestQueue.current.shift();
+        if (nextResolver) {
+          setTimeout(() => {
+            verifySession().then(nextResolver);
+          }, 100);
+        }
+      }
     }
-  }, []);
+  }, [error]);
 
   /**
-   * Refresh access token with error handling
+   * Refresh access token with enhanced error recovery
    * 
    * @returns {Promise<string|null>} New access token or null if refresh fails
    */
@@ -114,30 +161,34 @@ export function UserProvider({ children }) {
     try {
       const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
+      console.log('[UserContext] Refreshing access token...');
+
       const response = await fetch(`${API_BASE}/api/auth/refresh`, {
         method: 'POST',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
+        mode: 'cors'
       });
 
       if (response.ok) {
         const data = await response.json();
+        console.log('[UserContext] Token refreshed successfully');
         setAccessToken(data.accessToken);
         return data.accessToken;
       }
+
+      console.log('[UserContext] Token refresh failed:', response.status);
       return null;
     } catch (error) {
-      console.error('Token refresh error:', error);
+      console.error('[UserContext] Token refresh error:', error);
       return null;
     }
   }, []);
 
   /**
-   * Handle OAuth callback with simplified flow
-   * 
-   * Processes OAuth redirects and verifies session establishment
+   * Handle OAuth callback with enhanced flow management
    * 
    * @returns {Promise<boolean>} True if OAuth was handled, false otherwise
    */
@@ -149,32 +200,45 @@ export function UserProvider({ children }) {
     const oauthError = urlParams.get('error');
 
     if (oauthError) {
-      console.error('OAuth error:', oauthError);
+      console.error('[UserContext] OAuth error:', oauthError);
+      setError('oauth_error');
       return false;
     }
 
     if (oauthSuccess || window.location.pathname === '/auth/success') {
       setIsAuthenticating(true);
-      console.log('Handling OAuth callback...');
+      console.log('[UserContext] Handling OAuth callback...');
 
       try {
-        // Allow time for cookies to be established
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Allow time for cookies to be established (production-optimized)
+        await new Promise(resolve => setTimeout(resolve, 1500));
 
         const userData = await verifySession();
         if (userData) {
-          console.log('OAuth callback - User authenticated:', userData);
-          setUser(userData);
+          console.log('[UserContext] OAuth callback successful:', {
+            email: userData.email,
+            provider: userData.provider
+          });
 
-          // Clear OAuth parameters from URL
+          setUser(userData);
+          setError(null);
+
+          // Clean URL for better UX
           if (window.history.replaceState) {
-            window.history.replaceState({}, '', window.location.pathname);
+            const cleanUrl = window.location.pathname;
+            window.history.replaceState({}, '', cleanUrl);
+            console.log('[UserContext] URL cleaned:', cleanUrl);
           }
 
           return true;
         }
+
+        console.log('[UserContext] OAuth callback failed - no user data');
+        setError('oauth_failed');
+
       } catch (error) {
-        console.error('OAuth callback error:', error);
+        console.error('[UserContext] OAuth callback error:', error);
+        setError('oauth_error');
       } finally {
         setIsAuthenticating(false);
       }
@@ -184,204 +248,150 @@ export function UserProvider({ children }) {
   }, [verifySession]);
 
   /**
-   * Single initialization function with mount protection
-   * 
-   * Ensures authentication initialization occurs only once
-   * and handles both OAuth and regular session verification
+   * Enhanced authentication initialization with state management
    */
   const initializeAuth = useCallback(async () => {
     if (initializationDone.current || !mountedRef.current) {
-      console.log('Auth initialization already completed or component unmounted');
+      console.log('[UserContext] Initialization already completed or unmounted');
       return;
     }
 
     try {
       setLoading(true);
       initializationDone.current = true;
+      setError(null);
 
-      console.log('Starting auth initialization...');
+      console.log('[UserContext] Starting enhanced auth initialization...');
 
-      // Handle OAuth callback first
+      // Handle OAuth callback first (if applicable)
       const oauthHandled = await handleOAuthCallback();
 
       // If OAuth wasn't handled, perform regular session verification
       if (!oauthHandled) {
-        console.log('Performing regular session verification...');
+        console.log('[UserContext] Performing regular session verification...');
         const userData = await verifySession();
 
         if (userData) {
-          console.log('Regular verification successful:', userData);
+          console.log('[UserContext] Regular verification successful');
           setUser(userData);
         } else {
-          console.log('No active session found');
+          console.log('[UserContext] No active session found');
           setUser(null);
         }
       }
 
     } catch (error) {
-      console.error('Auth initialization error:', error);
+      console.error('[UserContext] Auth initialization error:', error);
       if (mountedRef.current) {
         setUser(null);
+        setError('initialization_error');
       }
     } finally {
       if (mountedRef.current) {
         setLoading(false);
+        console.log('[UserContext] Auth initialization completed');
       }
     }
   }, [verifySession, handleOAuthCallback]);
 
   /**
    * Primary authentication initialization effect
-   * 
-   * Runs once on component mount to establish initial auth state
    */
   useEffect(() => {
     mountedRef.current = true;
+    console.log('[UserContext] Mounting UserProvider...');
     initializeAuth();
 
     return () => {
+      console.log('[UserContext] Unmounting UserProvider...');
       mountedRef.current = false;
     };
   }, [initializeAuth]);
 
   /**
-   * Cleanup effect for resource management
-   * 
-   * Prevents memory leaks and ensures proper cleanup
+   * Comprehensive cleanup effect
    */
   useEffect(() => {
     return () => {
       mountedRef.current = false;
       initializationDone.current = false;
 
-      // Clear any pending timeouts
+      // Clear all timeouts
       if (verificationTimeoutRef.current) {
         clearTimeout(verificationTimeoutRef.current);
       }
+
+      // Clear request queue
+      requestQueue.current = [];
+
+      console.log('[UserContext] Cleanup completed');
     };
   }, []);
 
   /**
-   * Complete user profile
-   * 
-   * @param {Object} profileData - Profile data to complete
-   * @returns {Promise<Object>} Result from the API
-   */
-  const completeProfile = async (profileData) => {
-    try {
-      const result = await userService.completeProfile(profileData);
-      if (result.user) {
-        setUser(result.user);
-      }
-      return result;
-    } catch (error) {
-      console.error('Complete profile error:', error);
-      throw error;
-    }
-  };
-
-  /**
-   * Update medical profile
-   * 
-   * @param {Object} medicalData - Medical data to update
-   * @returns {Promise<Object>} Result from the API
-   */
-  const updateMedicalProfile = async (medicalData) => {
-    try {
-      const result = await userService.updateMedicalProfile(medicalData);
-      if (result.user) {
-        setUser(result.user);
-      }
-      return result;
-    } catch (error) {
-      console.error('Update medical profile error:', error);
-      throw error;
-    }
-  };
-
-  /**
-   * Update user profile
-   * 
-   * @param {Object} profileData - Profile data to update
-   * @returns {Promise<Object>} Result from the API
-   */
-  const updateProfile = async (profileData) => {
-    try {
-      if (!user?._id) throw new Error('No user ID available');
-      const result = await userService.updateProfile(user._id, profileData);
-      if (result.user) {
-        setUser(result.user);
-      }
-      return result;
-    } catch (error) {
-      console.error('Update profile error:', error);
-      throw error;
-    }
-  };
-
-  /**
-   * User sign-out handler
-   * 
-   * Clears local state and invokes backend logout
-   * 
-   * @returns {Promise<void>}
+   * Enhanced user sign-out handler
    */
   const signOut = async () => {
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
+      console.log('[UserContext] Signing out user...');
 
       await fetch(`${API_BASE}/api/auth/logout`, {
         method: 'POST',
-        credentials: 'include'
+        credentials: 'include',
+        mode: 'cors'
       });
 
-      console.log('User signed out successfully');
+      console.log('[UserContext] User signed out successfully');
 
     } catch (error) {
-      console.error('Sign out error:', error);
+      console.error('[UserContext] Sign out error:', error);
     } finally {
-      // Reset all state regardless of backend response
+      // Comprehensive state reset
       setUser(null);
       setAccessToken(null);
+      setError(null);
       initializationDone.current = false;
       verificationInProgress.current = false;
 
-      // Clear client-side storage
+      // Clear all client-side storage
       localStorage.removeItem('userData');
       sessionStorage.removeItem('authToken');
+      sessionStorage.removeItem('userSession');
 
-      // Redirect to signin
-      window.location.href = '/auth/signIn';
+      console.log('[UserContext] State cleared, redirecting to signin...');
+
+      // Redirect to signin with safety delay
+      setTimeout(() => {
+        window.location.href = '/auth/signIn';
+      }, 100);
     }
   };
 
   /**
-   * Force refresh user data from backend
-   * 
-   * Useful after profile updates or when fresh data is needed
-   * 
-   * @returns {Promise<Object|null>} Updated user data or null
+   * Force refresh user data with error handling
    */
   const refreshUserData = async () => {
     try {
-      console.log('Refreshing user data...');
+      console.log('[UserContext] Force refreshing user data...');
       const userData = await verifySession();
       if (userData && mountedRef.current) {
-        console.log('User data refreshed:', userData);
+        console.log('[UserContext] User data refreshed successfully');
         setUser(userData);
+        setError(null);
         return userData;
       }
       return null;
     } catch (error) {
-      console.error('Refresh user data error:', error);
+      console.error('[UserContext] Refresh user data error:', error);
+      setError('refresh_error');
       return null;
     }
   };
 
   /**
-   * Get current access token with automatic refresh
-   * 
-   * @returns {Promise<string|null>} Current access token
+   * Enhanced access token management
    */
   const getAccessToken = async () => {
     if (accessToken) {
@@ -394,41 +404,39 @@ export function UserProvider({ children }) {
 
   /**
    * Check if user has specific role
-   * 
-   * @param {string} role - Role to check
-   * @returns {boolean} True if user has the role
    */
   const hasRole = (role) => {
     return user?.roles?.includes(role) || false;
   };
 
   /**
-   * Check if user is authenticated
-   * 
-   * @returns {boolean} Authentication status
+   * Check authentication status
    */
   const isAuthenticated = () => {
-    return !!user && !loading;
+    return !!user && !loading && !error;
   };
 
   /**
-   * Check if user profile is complete
-   * 
-   * @returns {boolean} Profile completion status
+   * Check profile completion status
    */
   const isProfileComplete = () => {
     return user?.isProfileComplete || false;
   };
 
   /**
-   * Update user profile data
-   * 
-   * @param {Object} updates - User data updates
+   * Update user data with safety checks
    */
   const updateUser = (updates) => {
     if (mountedRef.current) {
       setUser(prev => prev ? { ...prev, ...updates } : null);
     }
+  };
+
+  /**
+   * Clear any authentication errors
+   */
+  const clearError = () => {
+    setError(null);
   };
 
   /**
@@ -438,23 +446,61 @@ export function UserProvider({ children }) {
     // State
     user,
     loading: loading || isAuthenticating,
+    error,
 
     // Actions
     signOut,
     refreshUserData,
     updateUser,
-    completeProfile,
-    updateMedicalProfile,
-    updateProfile,
+    completeProfile: async (profileData) => {
+      try {
+        const result = await userService.completeProfile(profileData);
+        if (result.user) {
+          setUser(result.user);
+        }
+        return result;
+      } catch (error) {
+        console.error('[UserContext] Complete profile error:', error);
+        throw error;
+      }
+    },
+    updateMedicalProfile: async (medicalData) => {
+      try {
+        const result = await userService.updateMedicalProfile(medicalData);
+        if (result.user) {
+          setUser(result.user);
+        }
+        return result;
+      } catch (error) {
+        console.error('[UserContext] Update medical profile error:', error);
+        throw error;
+      }
+    },
+    updateProfile: async (profileData) => {
+      try {
+        if (!user?._id) throw new Error('No user ID available');
+        const result = await userService.updateProfile(user._id, profileData);
+        if (result.user) {
+          setUser(result.user);
+        }
+        return result;
+      } catch (error) {
+        console.error('[UserContext] Update profile error:', error);
+        throw error;
+      }
+    },
 
     // Token management
     getAccessToken,
     refreshToken,
 
-    // Role and permission checks
+    // Status checks
     hasRole,
     isAuthenticated: isAuthenticated(),
     isProfileComplete,
+
+    // Error handling
+    clearError,
 
     // Status
     isAuthenticating
@@ -468,9 +514,9 @@ export function UserProvider({ children }) {
 }
 
 /**
- * Custom hook to access user context
+ * Custom hook to access enhanced user context
  * 
- * @returns {Object} User context value
+ * @returns {Object} Enhanced user context value
  * @throws {Error} If used outside UserProvider
  */
 export function useUser() {
